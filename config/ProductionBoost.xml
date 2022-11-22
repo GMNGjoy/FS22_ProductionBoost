@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+
+<!-- GLOBAL SETTINGS - OVERRIDE ALL OTHERS -->
+<productionBoost showDebug="false" globalFactor="2.0" notOwnedFactor="5.0" cycleFactor="1.0" storageFactor="1.0">
+    <productionOverrides>
+	
+        <!-- *** Base Game Examples *** -->
+        <!-- either specify both,
+        <productionOverride
+            configFileName="data/placeables/lizard/productionPoints/tailorShop/tailorShop.xml"
+            cycleFactor="2.0" storageFactor="5.0"
+        />
+        -->
+        <!-- or only specify the global which will apply to both 
+        <productionOverride
+            configFileName="data/placeables/lizard/productionPoints/tailorShop/tailorShop.xml"
+            globalFactor="2.0"
+        />
+        -->
+
+        <!-- *** Mod Example *** -->
+        <!-- if you omit a setting, it will default to 1.0
+        <productionOverride 
+            configFileName="FS22_Farm_Sawmill/farmSawmill.xml"
+            storageFactor="2.0"
+        />
+        -->
+
+    </productionOverrides>
+</productionBoost>
