@@ -26,11 +26,19 @@ function ProductionBoost.initXml()
 	}
 	for _, s in ipairs(productionSchemas) do
 		s.schema:register(XMLValueType.STRING, s.key.."#configFileName", "Vehicle config file xml full path - used to identify supported vehicles", nil)
+		s.schema:register(XMLValueType.BOOL, s.key.."#showDebug", "Show debug in console for this production only", false)
 		s.schema:register(XMLValueType.STRING, s.key.."#globalFactor", "Multiplication factor applied to both cycle & storage", nil)
 		s.schema:register(XMLValueType.STRING, s.key.."#notOwnedFactor", "Multiplication factor applied storage if production is not owned", nil)
 		s.schema:register(XMLValueType.STRING, s.key.."#cycleFactor", "Multiplication factor applied to each production cycle", nil)
 		s.schema:register(XMLValueType.STRING, s.key.."#storageFactor", "Multiplication factor applied to each storage fillType", nil)
+	
+		s.schema:register(XMLValueType.STRING, s.key..".storage(?)#fillType", "FillType to override", nil)
+		s.schema:register(XMLValueType.STRING, s.key..".storage(?)#capacity", "New Capacity", nil)
+		s.schema:register(XMLValueType.STRING, s.key..".storage(?)#notOwnedCapacity", "New Capacity if production not owned", nil)
+		
 	end
+
+
 end
 --
 function ProductionBoost.importUserConfigurations(userSettingsFile, overwriteExisting)
@@ -76,8 +84,12 @@ function ProductionBoost.importGlobalSettings(xmlFilename, overwriteExisting)
 				printf("    -- Show Debug: %s", ProductionBoost.showDebug)
 				printf("    -- Global Factor: %2.1f", ProductionBoost.globalFactor)
 				printf("    -- NotOwned Factor: %2.1f", ProductionBoost.notOwnedFactor)
-				printf("    -- Cycle Factor: %2.1f", ProductionBoost.cycleFactor)
-				printf("    -- Storage Factor: %2.1f", ProductionBoost.storageFactor)
+				if ProductionBoost.cycleFactor ~= nil then 
+					printf("    -- Cycle Factor: %2.1f", ProductionBoost.cycleFactor)
+				end
+				if ProductionBoost.storageFactor ~= nil then 
+					printf("    -- Storage Factor: %2.1f", ProductionBoost.storageFactor)
+				end
 			end
 			xmlFile:delete()
 		end
@@ -109,46 +121,39 @@ function ProductionBoost.importProductionOverrides(xmlFilename, overwriteExistin
 			if validXmlFilename ~= nil then
 				local config = ProductionBoost.PRODUCTION_CONFIGURATIONS[validXmlFilename]
 				if config == nil or overwriteExisting then 
+					-- init a new object
 					config = {}
-					-- configGroup[selectedConfigs].loadingArea = {}
-					
-					-- local config = configGroup[selectedConfigs]
-					-- config.useConfigName = useConfigName
+
+					-- set the filename based off of the loaded validXmlFilename
 					config.xmlFilename = validXmlFilename
-					
-					-- local j = 0
-					-- local hasBaleHeight = false
-					-- while true do
-					-- 	local loadAreaKey = string.format("%s.loadingArea(%d)", configKey, j)
-					-- 	if not xmlFile:hasProperty(loadAreaKey) then
-					-- 		break
-					-- 	end
-					-- 	config.loadingArea[j+1] = {}
-					-- 	config.loadingArea[j+1].width  = xmlFile:getValue(loadAreaKey.."#width")
-					-- 	config.loadingArea[j+1].length = xmlFile:getValue(loadAreaKey.."#length")
-					-- 	config.loadingArea[j+1].height = xmlFile:getValue(loadAreaKey.."#height")
-					-- 	config.loadingArea[j+1].baleHeight = xmlFile:getValue(loadAreaKey.."#baleHeight", nil)
-					-- 	config.loadingArea[j+1].offset = xmlFile:getValue(loadAreaKey.."#offset", "0 0 0", true)
-					-- 	config.loadingArea[j+1].noLoadingIfFolded = xmlFile:getValue(loadAreaKey.."#noLoadingIfFolded", false)
-					-- 	config.loadingArea[j+1].noLoadingIfUnfolded = xmlFile:getValue(loadAreaKey.."#noLoadingIfUnfolded", false)
-					-- 	config.loadingArea[j+1].noLoadingIfCovered = xmlFile:getValue(loadAreaKey.."#noLoadingIfCovered", false)
-					-- 	config.loadingArea[j+1].noLoadingIfUncovered = xmlFile:getValue(loadAreaKey.."#noLoadingIfUncovered", false)
-					-- 	hasBaleHeight = hasBaleHeight or type(config.loadingArea[j+1].baleHeight) == 'number'
-					-- 	j = j + 1
-					-- end
-					
-					-- local isBaleTrailer = xmlFile:getValue(configKey..".options#isBaleTrailer", nil)
-					-- local horizontalLoading = xmlFile:getValue(configKey..".options#horizontalLoading", nil)
-					
-					-- config.horizontalLoading = horizontalLoading or isBaleTrailer or false
-					-- config.isBaleTrailer = isBaleTrailer or hasBaleHeight
-				
-					config.showDebug = xmlFile:getValue(configKey.."#showDebug", debugAll)
+
+					-- set the config values from the xml
+					config.showDebug = xmlFile:getValue(configKey.."#showDebug", false)
 					config.globalFactor = xmlFile:getValue(configKey.."#globalFactor", nil)
 					config.notOwnedFactor = xmlFile:getValue(configKey.."#notOwnedFactor", nil)
 					config.cycleFactor = xmlFile:getValue(configKey.."#cycleFactor", nil)
 					config.storageFactor = xmlFile:getValue(configKey.."#storageFactor", nil)
 
+					-- allow individual storage filltypes to be overridden
+					local storageOverrides = {}
+					local j = 0
+					while true do
+						local loadAreaKey = string.format("%s.storage(%d)", configKey, j)
+						if not xmlFile:hasProperty(loadAreaKey) then
+							break
+						end
+						storageOverrides[j+1] = {}
+						storageOverrides[j+1].fillType = xmlFile:getValue(loadAreaKey.."#fillType")
+						storageOverrides[j+1].capacity = xmlFile:getValue(loadAreaKey.."#capacity")
+						storageOverrides[j+1].notOwnedCapacity = xmlFile:getValue(loadAreaKey.."#notOwnedCapacity")
+						j = j + 1
+					end
+
+					if table.getn(storageOverrides) ~= 0 then
+						config.storage = storageOverrides
+					end
+
+					-- if we've enabled debug on an individual item, call it out as it's loaded
 					if not config.showDebug then
 						printf("---- parsed %s", validXmlFilename)
 					else
@@ -222,8 +227,14 @@ end
 --
 function ProductionBoost.updateSingleProduction(productionPoint)
 
+	-- get the xml filename and owner
 	local xmlFilename = productionPoint.owningPlaceable.configFileName
 	local validXmlFilename = ProductionBoost.getValidXmlName(xmlFilename)
+
+	if showDebug or ProductionBoost.debugFull then 
+		printf("---- Production: %s [%s]", productionPoint:getName(), validXmlFilename)
+	end
+
 	local prodOwnerId = productionPoint:getOwnerFarmId()
 	local isProductionOwned = prodOwnerId ~= 0
 	
@@ -231,7 +242,17 @@ function ProductionBoost.updateSingleProduction(productionPoint)
 	local showDebug = ProductionBoost.showDebug
 	local cycleFactor = ProductionBoost.globalFactor
 	local storageFactor = cycleFactor
+	local storageOverrides = nil
 	
+	-- from the config, if cycleFactor or storage factor is set, use those.
+	if ProductionBoost.cycleFactor ~= nil then
+		cycleFactor = ProductionBoost.cycleFactor
+	end
+	if ProductionBoost.storageFactor ~= nil then
+		storageFactor = ProductionBoost.storageFactor
+	end
+
+	-- if the production is not owned, apply the notOwnedFactor to extend the input amounts
 	if not isProductionOwned then
 		storageFactor = ProductionBoost.notOwnedFactor
 	end
@@ -252,10 +273,18 @@ function ProductionBoost.updateSingleProduction(productionPoint)
 		if customConfig.storageFactor ~= nil then
 			storageFactor = customConfig.storageFactor
 		end
+		if customConfig.storage ~= nil then
+			storageOverrides = customConfig.storage
+			print("---- STORAGE OVERRIDES")
+			print_r(storageOverrides)
+		end
 	end
 
 	-- exit if we don't need to continue
-	if cycleFactor == 1 and storageFactor == 1 then
+	if cycleFactor == 1 and storageFactor == 1 and storageOverrides == nil then
+		if showDebug or ProductionBoost.debugFull then 
+			print("---- SKIP")
+		end
 		return
 	end
 
@@ -264,14 +293,14 @@ function ProductionBoost.updateSingleProduction(productionPoint)
 		printf("---- Boosting: %s", productionPoint:getName())
 	end
 	if ProductionBoost.debugFull then 
-		printf("---- -- productionPointFilename: %s", validXmlFilename)
-		printf("---- -- producitonPointOwnerId: %s", prodOwnerId)
-		printf("---- -- isOwned: %s ", isProductionOwned)
-		printf("---- -- cycleFactor: %2.1f", cycleFactor)
-		printf("---- -- storageFactor: %2.1f", storageFactor)
+		printf("---- - productionPointFilename: %s", validXmlFilename)
+		printf("---- - productionPointOwnerId: %s", prodOwnerId)
+		printf("---- - isOwned: %s ", isProductionOwned)
+		printf("---- - cycleFactor: %2.1f", cycleFactor)
+		printf("---- - storageFactor: %2.1f", storageFactor)
 	end
 	
-	-- update production recipe cycles per month
+	-- update production recipe cycles per month based on the input factor
 	if cycleFactor ~= 1 then
 		for i, production in ipairs(productionPoint.productions) do
 			if production.outputs[1] ~= nil then
@@ -283,7 +312,7 @@ function ProductionBoost.updateSingleProduction(productionPoint)
 				production.cyclesPerMonth = production.cyclesPerHour * 24 -- per day, actually
 
 				if showDebug or ProductionBoost.debugFull then
-					printf("---- -- Recipe %s cycles/m boosted by %2.1f from %s to %s",
+					printf("---- - Recipe %s cycles/m boosted by %2.1f from %s to %s",
 						production.name,
 						cycleFactor, 
 						origPerMonth, 
@@ -295,19 +324,53 @@ function ProductionBoost.updateSingleProduction(productionPoint)
 	end
 
 	-- increase the input and output numbers to match the new production rates
-	if storageFactor ~= 1 then
-		for i, value in pairs(productionPoint.storage.capacities) do
-			local newValue = value * storageFactor
+	if storageFactor ~= 1 or storageOverrides then
+		for i, capacity in pairs(productionPoint.storage.capacities) do
+			local newCapacity = 0
+			local fillTypeName = g_fillTypeManager.fillTypes[i].name
 
-			productionPoint.storage.capacities[i] = newValue
-			
-			if showDebug or ProductionBoost.debugFull then
-				printf("---- -- Storage for %s boosted by %2.1f from %s to %s",
-					g_fillTypeManager.fillTypes[i].name,
-					storageFactor,
-					value,
-					newValue
-				)
+			-- if the config forces an override capacity then override it
+			if storageOverrides ~= nil then
+				local override
+				for s, eachOverride in ipairs(storageOverrides) do
+					if eachOverride.fillType.upper == fillTypeName.upper then 
+						override = eachOverride
+					end
+				end
+
+				-- if we found a fillType specific override, apply it as needed
+				if override ~= nil then
+					if isProductionOwned and override.capacity ~= nil then
+						newCapacity = override.capacity
+					end
+					if not isProductionOwned and override.notOwnedCapacity ~= nil then
+						newCapacity = override.notOwnedCapacity
+					end
+	
+					if showDebug or ProductionBoost.debugFull then
+						printf("---- - Storage for %s forced update from %s to %s",
+							fillTypeName,
+							capacity,
+							newCapacity
+						)
+					end	
+				end
+
+			else 
+				newCapacity = capacity * storageFactor
+				if showDebug or ProductionBoost.debugFull then
+					printf("---- - Storage for %s boosted by %2.1f from %s to %s",
+						fillTypeName,
+						storageFactor,
+						capacity,
+						newCapacity
+					)
+				end
+			end 
+
+			-- actually set the new capacity back into the production point
+			if newCapacity ~= 0 then
+				productionPoint.storage.capacities[i] = newCapacity
 			end
 		end
 	end

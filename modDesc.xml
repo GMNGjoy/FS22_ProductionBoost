@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="71">
     <author>GMNGjoy</author>
-    <version>0.1.0.0</version>
+    <version>0.2.0.0</version>
     <title>
         <en>Production Boost</en>
     </title>
@@ -9,10 +9,11 @@
         <en>
             <![CDATA[This script based mod increases the speed of production points as well as storage capacities by a consistent factor
             
-Changelog 0.1.0.0 - xml configs loading, and applied to in-game productions
-Changelog 0.0.0.3 - found the xml filename for productions via load
-Changelog 0.0.0.2 - got boosting to work via load injection
-Changelog 0.0.0.1 - initial commit
+Changelog:
+0.1.0.0 - XML configs loading, and applied to in-game productions
+0.0.0.3 - found the XML filename for productions via load
+0.0.0.2 - got boosting to work via load injection
+0.0.0.1 - initial commit
 ]]>
 		</en>
     </description>
