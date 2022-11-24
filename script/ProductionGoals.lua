@@ -10,6 +10,19 @@ ProductionGoals.stats = {
 ProductionGoals.productions = {}
 ProductionGoals.productionStats = {}
 
+
+-- TODO
+-- Add production goal xml loader
+-- Add listeners
+---- Listener for production being purchased / sold
+---- Listener for production recipe being activated
+---- Listener for production being placed / demolished
+-- Add UI tab
+---- Add UI button
+---- Add UI display for goals / highlight if active
+---- Add UI progress bar for each
+-- Add UI display for any goal boost currently active
+
 function ProductionGoals:checkProductionUsage()	
 	if g_currentMission ~= nil and g_currentMission.productionChainManager ~= nil then
 		--local w = g_currentMission.productionChainManager.productionPoints;

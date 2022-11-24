@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<productionTypes>
+    <productionType name="bakery">
+        <production configFileName="data/placeables/lizard/productionPoints/bakeryUS/bakeryUS.xml" />
+        <production configFileName="data/placeables/lizard/productionPoints/bakeryEU/bakeryEU.xml" />
+    </productionType>
+
+    <productionType name="bga">
+        <production configFileName="data/placeables/planET/bga99kw/bga99kw.xml" />
+        <production configFileName="data/placeables/planET/bga250kw/bga250kw.xml" />
+        <production configFileName="data/placeables/planET/bga500kw/bga500kw.xml" />
+        <production configFileName="data/placeables/planET/bga1mw/bga1mw.xml" />
+    </productionType>
+
+    <productionType name="bgaMod">
+        <production configFileName="pumpsAndHosesPack/data/placeables/stallkamp/fermenters/fermenter20m.xml" />
+        <production configFileName="pumpsAndHosesPack/data/placeables/stallkamp/fermenters/fermenter26m.xml" />
+        <production configFileName="pumpsAndHosesPack/data/placeables/stallkamp/fermenters/fermenter30m.xml" />
+    </productionType>
+
+    <productionType name="carpentry">
+        <production configFileName="data/placeables/lizard/productionPoints/carpenterUS/carpenterUS.xml" />
+        <production configFileName="data/placeables/lizard/productionPoints/carpenterEU/carpenterEU.xml" />
+    </productionType>
+
+    <productionType name="cerealFactory">
+        <production configFileName="data/placeables/lizard/productionPoints/cerealFactory/cerealFactory.xml" />
+    </productionType>
+
+    <productionType name="dairy">
+        <production configFileName="data/placeables/lizard/productionPoints/dairyUS/dairyUS.xml" />
+        <production configFileName="data/placeables/lizard/productionPoints/dairyUS/dairyEU.xml" />
+    </productionType>
+
+    <productionType name="grainMill">
+        <production configFileName="data/placeables/mapUS/productionPointGrainMill/productionPointGrainMill.xml" />
+        <production configFileName="data/placeables/lizard/productionPoints/grainMill/grainMill.xml" />
+    </productionType>
+
+    <productionType name="greenhouse">
+        <production configFileName="data/placeables/lizard/greenhouses/greenhouseSmall/greenhouseSmall.xml" />
+        <production configFileName="data/placeables/lizard/greenhouses/greenhouseMedium/greenhouseMedium.xml" />
+        <production configFileName="data/placeables/lizard/greenhouses/greenhouseLarge/greenhouseLarge.xml" />
+    </productionType>
+
+    <productionType name="grapes">
+        <production configFileName="data/placeables/lizard/productionPoints/raisinFactory/raisinFactory.xml" />
+    </productionType>
+
+    <productionType name="oilMill">
+        <production configFileName="data/placeables/lizard/productionPoints/oilPlant/oilPlant.xml" />
+    </productionType>
+
+    <productionType name="sawmill">
+        <production configFileName="data/placeables/mapUS/sawmill/sawmill.xml" />
+        <production configFileName="FS22_Farm_Sawmill/farmSawmill.xml" />
+    </productionType>
+
+    <productionType name="spinnary">
+        <production configFileName="data/placeables/lizard/productionPoints/spinneryUS/spinneryUS.xml" />
+        <production configFileName="data/placeables/lizard/productionPoints/spinneryEU/spinneryEU.xml" />
+    </productionType>
+
+    <productionType name="sugarMill">
+        <production configFileName="data/placeables/lizard/productionPoints/sugarMill/sugarMill.xml" />
+    </productionType>
+
+    <productionType name="tailor">
+        <production configFileName="data/placeables/lizard/productionPoints/tailorShop/tailorShop.xml" />
+    </productionType>
+    
+</productionTypes>

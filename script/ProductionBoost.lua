@@ -4,13 +4,12 @@ ProductionBoost.notOwnedStorageFactor = 5.0
 ProductionBoost.debugFull = true
 ProductionBoost.path = g_currentModDirectory;
 ProductionBoost.modName = g_currentModName;
+ProductionBoost.internalSettingsFile = "config/ProductionBoost.xml"
 ProductionBoost.userSettingsFile = "modSettings/ProductionBoost.xml"
 ProductionBoost.PRODUCTION_CONFIGURATIONS = {}
 
 --
 function ProductionBoost.initXml()
-	--g_configurationManager:addConfigurationType("productionBoost", g_i18n:getText("configuration_productionBoost"), "productionBoost", nil, nil, nil, ConfigurationUtil.SELECTOR_MULTIOPTION)
-	
 	ProductionBoost.xmlSchema = XMLSchema.new("productionBoost")
 
 	local globalKey = "productionBoost"
@@ -35,10 +34,7 @@ function ProductionBoost.initXml()
 		s.schema:register(XMLValueType.STRING, s.key..".storage(?)#fillType", "FillType to override", nil)
 		s.schema:register(XMLValueType.STRING, s.key..".storage(?)#capacity", "New Capacity", nil)
 		s.schema:register(XMLValueType.STRING, s.key..".storage(?)#notOwnedCapacity", "New Capacity if production not owned", nil)
-		
 	end
-
-
 end
 --
 function ProductionBoost.importUserConfigurations(userSettingsFile, overwriteExisting)
@@ -55,7 +51,7 @@ function ProductionBoost.importUserConfigurations(userSettingsFile, overwriteExi
 		N = N + ProductionBoost.importProductionOverrides(userSettingsFile, overwriteExisting)
 	else
 		print("-- CREATING user settings file")
-		local defaultSettingsFile = Utils.getFilename("config/ProductionBoost.xml", ProductionBoost.path)
+		local defaultSettingsFile = Utils.getFilename(ProductionBoost.internalSettingsFile, ProductionBoost.path)
 		copyFile(defaultSettingsFile, userSettingsFile, false)
 
 		ProductionBoost.showDebug = false
@@ -404,32 +400,26 @@ function ProductionBoost:loadXml()
 		printf('-- ProductionBoost: Loaded Custom Production Configurations')
 		DebugUtil.printTableRecursively(ProductionBoost.PRODUCTION_CONFIGURATIONS)
 	end
+
+	-- initialize the production types
+	ProducitonTypes.initXML()
 end
-
-
+--
 function ProductionBoost:init()
-	printf('-- ProductionBoost: Initialize')
+	print('-- ProductionBoost: Initialize')
 
 	-- We need the mission active before this can be called.
 	Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00Finished, ProductionBoost.loadXml)
 
+	-- add listener for when a production is placed, and update that production as needed
+
+	-- add listener for when a production is purchased, update that production to an owned production
+
 	-- load the rest of the productions after we have a baseMission
 	FSBaseMission.registerActionEvents = Utils.appendedFunction(FSBaseMission.registerActionEvents, ProductionBoost.updateProductionData);
-	--FSBaseMission.onConnectionFinishedLoading = Utils.appendedFunction(FSBaseMission.onConnectionFinishedLoading, ProductionBoost.loadProductionData)
+
+	-- setup UI visibility for any production boost that is currently active
+
+	
 end
-
--- init the mod through the basegame loadMap function.
---addModEventListener(ProductionBoost)
 ProductionBoost.init()
-
--- function PlaceableProductionPoint:onLoad(savegame)
---     local spec = self.spec_productionPoint
---     local productionPoint = ProductionPoint.new(self.isServer, self.isClient, self.baseDirectory)
---     productionPoint.owningPlaceable = self
---     if productionPoint:load(self.components, self.xmlFile, "placeable.productionPoint", self.customEnvironment, self.i3dMappings) then
---         spec.productionPoint = productionPoint
---     else
---         productionPoint:delete()
---         self:setLoadingState(Placeable.LOADING_STATE_ERROR)
---     end
--- end

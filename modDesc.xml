@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="71">
     <author>GMNGjoy</author>
-    <version>0.2.0.0</version>
+    <version>0.2.1.0</version>
     <title>
         <en>Production Boost</en>
     </title>
@@ -10,6 +10,8 @@
             <![CDATA[This script based mod increases the speed of production points as well as storage capacities by a consistent factor
             
 Changelog:
+0.2.1.0 - Created scaffolding for Types & Goals.
+0.2.0.0 - All XML config types loading, overriding working as expected.
 0.1.0.0 - XML configs loading, and applied to in-game productions
 0.0.0.3 - found the XML filename for productions via load
 0.0.0.2 - got boosting to work via load injection
@@ -21,6 +23,8 @@ Changelog:
     <multiplayer supported="true" />
 
 	<extraSourceFiles>
-		<sourceFile filename="ProductionBoost.lua"/>
+		<sourceFile filename="script/ProductionBoost.lua"/>
+        <sourceFile filename="script/ProductionTypes.lua"/>
+        <!-- <sourceFile filename="script/ProductionGoals.lua"/> -->
 	</extraSourceFiles>
 </modDesc>
